@@ -67,7 +67,6 @@ server <- function(input, output, session) {
       theme(
         plot.title = element_text(
           hjust = 0.5,
-          face = "bold", 
           size = input$fontSize, 
           family = "Arial",
           colour = rgb(27/255, 87/255, 104/255)
@@ -79,13 +78,26 @@ server <- function(input, output, session) {
     if (input$graphType == 'Horizontal Bar Graph') {
       p <- p + coord_flip()
     }
+    p <- ggplotly(p)
     
-    ggplotly(p)
+    if (input$chart_caption != "") {
+      p <- p %>% 
+        layout(
+          margin = list(l = 50, r = 50, b = 100, t = 50), # Adjust as necessary to create enough space
+          annotations = list(
+            list(
+              x = 1, y = -0.3, # Set to the bottom right
+              xref = 'paper', yref = 'paper',
+              text = input$chart_caption,
+              showarrow = FALSE, xanchor = 'right',
+              font = list(size = 10, color = 'grey50')
+            )
+          )
+        )
+    }
+    
+    p # This returns the modified plotly object
   })
-  
-  # ... [rest of the server code remains unchanged]
-
-
   
   output$dataTable <- renderDT({
     req(data())
