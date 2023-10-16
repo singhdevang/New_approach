@@ -5,6 +5,7 @@ ui <- fluidPage(
     sidebarPanel(
       fileInput("file1", "Choose CSV or Excel File",
                 accept = c(".csv", ".xlsx")),
+      selectInput("sheet", "Select the sheet to be used:", choices = NULL),
       
       selectInput("graphType", "Graph Type:",
                   choices = c("Horizontal Bar Graph", "Vertical Bar Graph")),

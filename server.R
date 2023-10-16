@@ -1,18 +1,37 @@
 server <- function(input, output, session) {
   
-  # This reactive expression specifically handles file uploads
-  uploadedData <- reactive({
+  # This reactive expression handles the file input
+  observeEvent(input$file1, {
     inFile <- input$file1
     
     if (is.null(inFile)) {
       return(NULL)
     }
     
-    # Read the data file
+    # Check if it's an Excel file before trying to read sheets
+    if (grepl("\\.xlsx$", inFile$name)) {
+      # Get the sheet names
+      sheets <- excel_sheets(inFile$datapath)
+      
+      # Update the choices in the sheet selection input
+      updateSelectInput(session, "sheet", choices = sheets)
+    }
+  }, ignoreInit = TRUE)
+  
+  # This reactive expression reads the data from the file
+  data <- reactive({
+    inFile <- input$file1
+    
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    
+    # Check file type to read the data accordingly
     if (grepl("\\.csv$", inFile$name)) {
       df <- read.csv(inFile$datapath)
     } else {
-      df <- read_excel(inFile$datapath)
+      # Read the specific sheet
+      df <- read_excel(inFile$datapath, sheet = input$sheet)
     }
     
     # Set column names for the sortCol input only when a new file is uploaded
@@ -22,8 +41,8 @@ server <- function(input, output, session) {
   })
   
   # This reactive expression handles the sorting and is dependent on the uploaded data and sort inputs
-  data <- reactive({
-    df <- uploadedData()
+  sortedData <- reactive({
+    df <- data()
     
     if (is.null(df)) {
       return(NULL)
@@ -38,9 +57,9 @@ server <- function(input, output, session) {
   })
   
   output$barPlot <- renderPlotly({
-    req(data())
+    req(sortedData())
     
-    df <- data()
+    df <- sortedData()
     
     # Determine which is the character column
     char_col <- names(which(sapply(df, is.character)))[1]
@@ -60,6 +79,7 @@ server <- function(input, output, session) {
       y_axis <- input$ylab
     }
     
+    
     p <- ggplot(df, aes_string(x = char_col, y = num_col)) + 
       geom_bar(stat = "identity", fill = rgb(74/255, 121/255, 134/255), width = input$barSpace) +
       labs(title = input$chartTitle, x = x_axis, y = y_axis) +
@@ -78,31 +98,45 @@ server <- function(input, output, session) {
     if (input$graphType == 'Horizontal Bar Graph') {
       p <- p + coord_flip()
     }
+    
+    # Convert ggplot object to plotly object
     p <- ggplotly(p)
     
+    # Customize axis lines and enable autorange based on graph type
+    if (input$graphType == 'Horizontal Bar Graph') {
+      p <- p %>% layout(
+        xaxis = list(zeroline = TRUE, zerolinecolor = 'gray', zerolinewidth = 1, autorange = TRUE),
+        yaxis = list(autorange = TRUE)  # Ensuring y-axis also uses autorange
+      )
+    } else { # 'Vertical Bar Graph'
+      p <- p %>% layout(
+        xaxis = list(autorange = TRUE),  # Ensuring x-axis also uses autorange
+        yaxis = list(zeroline = TRUE, zerolinecolor = 'gray', zerolinewidth = 1, autorange = TRUE)
+      )
+    }
+    
+    # If there's a chart caption, add it
     if (input$chart_caption != "") {
       p <- p %>% 
         layout(
-          margin = list(l = 50, r = 50, b = 100, t = 50), # Adjust as necessary to create enough space
+          margin = list(l = 50, r = 50, b = 100, t = 50),
           annotations = list(
             list(
               x = 1, y = -0.3, # Set to the bottom right
               xref = 'paper', yref = 'paper',
               text = input$chart_caption,
               showarrow = FALSE, xanchor = 'right',
-              font = list(size = 10, color = 'grey50')
+              font = list(size = 12, color = 'black', family = "Arial")
             )
           )
         )
     }
     
-    p # This returns the modified plotly object
+    # Return the modified plotly object
+    p 
   })
-  
   output$dataTable <- renderDT({
-    req(data())
-    datatable(data())
+    req(sortedData())
+    datatable(sortedData())
   })
 }
-
-
