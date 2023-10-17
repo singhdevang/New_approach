@@ -11,6 +11,8 @@ ui <- fluidPage(
       
       selectInput("graphType", "Graph Type:",
                   choices = c("Horizontal Bar Graph", "Vertical Bar Graph")),
+      uiOutput("numeric_selection"),
+      
       
       # UI elements for sorting
       selectInput("sortCol", "Sort Column:", NULL), # Choices are set dynamically in server

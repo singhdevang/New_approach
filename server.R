@@ -55,15 +55,30 @@ server <- function(input, output, session) {
     
     return(df)
   })
+  output$numeric_selection <- renderUI({
+    df <- data()
+    # Check if data frame has exactly two numeric columns
+    if (!is.null(df) && sum(sapply(df, is.numeric)) == 2) {
+      selectInput("selected_numeric", "Select the numeric column:", 
+                  choices = names(df)[sapply(df, is.numeric)], selected = NULL)
+    }
+  })
   
   output$barPlot <- renderPlotly({
     req(sortedData())
     
     df <- sortedData()
     
-    # Determine which is the character column
-    char_col <- names(which(sapply(df, is.character)))[1]
-    num_col <- names(which(sapply(df, is.numeric)))[1]
+    # Determine which is the character column and numeric column
+    if (!is.null(input$selected_numeric)) {
+      num_col <- input$selected_numeric
+      # Get the other column by excluding the selected numeric column
+      char_col <- names(df)[!names(df) %in% num_col]
+    } else {
+      char_col <- names(which(sapply(df, is.character)))[1]
+      num_col <- names(which(sapply(df, is.numeric)))[1]
+    }
+    
     
     # If data is sorted and it's a bar graph, reorder the factor levels
     if (!is.null(input$sortCol) && !is.null(input$sortOrder)) {
@@ -104,8 +119,8 @@ server <- function(input, output, session) {
     
     # Convert ggplot object to plotly object
     p <- ggplotly(p)
-   
-
+    
+    
     
     # Customize axis lines, enable autorange, and adjust title standoff
     if (input$graphType == 'Horizontal Bar Graph') {
