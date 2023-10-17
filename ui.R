@@ -1,9 +1,11 @@
 ui <- fluidPage(
+  theme = shinytheme("flatly"),
   titlePanel("Improvement Cymru Graph Customisation Tool"),
+  
   
   sidebarLayout(
     sidebarPanel(
-      fileInput("file1", "Choose CSV or Excel File",
+      fileInput("file1", "Choose CSV, Excel", 
                 accept = c(".csv", ".xlsx")),
       selectInput("sheet", "Select the sheet to be used:", choices = NULL),
       
@@ -17,7 +19,7 @@ ui <- fluidPage(
       textInput("chartTitle", "Chart Title:", ""),
       textInput("chart_caption", "Chart Caption:", ""),
       numericInput("fontSize", "Font Size:", 14, min = 1, max = 40),
-      sliderInput("barSpace", "Bar Spacing:",
+      sliderInput("barSpace", "Bar Width:",
                   min = 0.1, max = 1, value = 0.7, step = 0.1),
       textInput("xlab", "X Axis Label:", ""),
       textInput("ylab", "Y Axis Label:", "")

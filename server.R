@@ -91,8 +91,11 @@ server <- function(input, output, session) {
           family = "Arial",
           colour = rgb(27/255, 87/255, 104/255)
         ),
+        axis.title.x = element_text(family = "Arial"), # Set Arial font for x axis title
+        axis.title.y = element_text(family = "Arial"), # Set Arial font for y axis title
         panel.grid = element_blank()
       )
+    
     
     # Add coord_flip if Horizontal Bar Graph is selected
     if (input$graphType == 'Horizontal Bar Graph') {
@@ -101,19 +104,40 @@ server <- function(input, output, session) {
     
     # Convert ggplot object to plotly object
     p <- ggplotly(p)
+   
+
     
-    # Customize axis lines and enable autorange based on graph type
+    # Customize axis lines, enable autorange, and adjust title standoff
     if (input$graphType == 'Horizontal Bar Graph') {
       p <- p %>% layout(
-        xaxis = list(zeroline = TRUE, zerolinecolor = 'gray', zerolinewidth = 1, autorange = TRUE),
-        yaxis = list(autorange = TRUE)  # Ensuring y-axis also uses autorange
+        xaxis = list(
+          zeroline = TRUE, 
+          zerolinecolor = 'gray', 
+          zerolinewidth = 1, 
+          autorange = TRUE,
+          titlestandoff = 15  # Adjust standoff to increase distance from axis
+        ),
+        yaxis = list(
+          autorange = TRUE,
+          titlestandoff = 15  # Adjust standoff to increase distance from axis
+        )
       )
     } else { # 'Vertical Bar Graph'
       p <- p %>% layout(
-        xaxis = list(autorange = TRUE),  # Ensuring x-axis also uses autorange
-        yaxis = list(zeroline = TRUE, zerolinecolor = 'gray', zerolinewidth = 1, autorange = TRUE)
+        xaxis = list(
+          autorange = TRUE,
+          titlestandoff = 15  # Adjust standoff to increase distance from axis
+        ),
+        yaxis = list(
+          zeroline = TRUE, 
+          zerolinecolor = 'gray', 
+          zerolinewidth = 1, 
+          autorange = TRUE,
+          titlestandoff = 15  # Adjust standoff to increase distance from axis
+        )
       )
     }
+    
     
     # If there's a chart caption, add it
     if (input$chart_caption != "") {
