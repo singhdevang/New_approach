@@ -16,7 +16,7 @@ ui <- fluidPage(
       
       # UI elements for sorting
       selectInput("sortCol", "Sort Column:", NULL), # Choices are set dynamically in server
-      selectInput("sortOrder", "Sort Order:", choices = c("Ascending" = "asc", "Descending" = "desc")),
+      selectInput("sortOrder", "Sort Order:", choices = c("None" = "none" , "Ascending" = "asc", "Descending" = "desc")),
       
       textInput("chartTitle", "Chart Title:", ""),
       textInput("chart_caption", "Chart Caption:", ""),

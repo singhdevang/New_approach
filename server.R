@@ -40,7 +40,6 @@ server <- function(input, output, session) {
     return(df)
   })
   
-  # This reactive expression handles the sorting and is dependent on the uploaded data and sort inputs
   sortedData <- reactive({
     df <- data()
     
@@ -48,13 +47,17 @@ server <- function(input, output, session) {
       return(NULL)
     }
     
-    # Sort data if inputs are not null and are applicable
-    if (!is.null(input$sortCol) && !is.null(input$sortOrder) && input$sortCol %in% names(df)) {
-      df <- df[order(df[[input$sortCol]], decreasing = input$sortOrder == "desc"), ]
+    # Check if "None" is selected for sorting. If so, return the original data frame.
+    if (input$sortOrder == "none" || is.null(input$sortCol) || !(input$sortCol %in% names(df))) {
+      return(df)
     }
+    
+    # Otherwise, proceed with sorting
+    df <- df[order(df[[input$sortCol]], decreasing = input$sortOrder == "desc"), ]
     
     return(df)
   })
+  
   output$numeric_selection <- renderUI({
     df <- data()
     # Check if data frame has exactly two numeric columns
