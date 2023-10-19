@@ -114,7 +114,6 @@ server <- function(input, output, session) {
         panel.grid = element_blank()
       )
     
-    
     # Add coord_flip if Horizontal Bar Graph is selected
     if (input$graphType == 'Horizontal Bar Graph') {
       p <- p + coord_flip()
@@ -123,9 +122,8 @@ server <- function(input, output, session) {
     # Convert ggplot object to plotly object
     p <- ggplotly(p)
     
-    
-    
     # Customize axis lines, enable autorange, and adjust title standoff
+    standoff_value <- 30  # Increase this value to move the axis title further away
     if (input$graphType == 'Horizontal Bar Graph') {
       p <- p %>% layout(
         xaxis = list(
@@ -133,35 +131,47 @@ server <- function(input, output, session) {
           zerolinecolor = 'gray', 
           zerolinewidth = 1, 
           autorange = TRUE,
-          titlestandoff = 15  # Adjust standoff to increase distance from axis
+          title = list(
+            text = y_axis,
+            standoff = standoff_value
+          )
         ),
         yaxis = list(
           autorange = TRUE,
-          titlestandoff = 15  # Adjust standoff to increase distance from axis
-        )
+          title = list(
+            text = x_axis,
+            standoff = standoff_value
+          )
+        ),
+        margin = list(l = 60, r = 50, b = 100, t = 50, pad = 4)  # Adjust margins if needed
       )
     } else { # 'Vertical Bar Graph'
       p <- p %>% layout(
         xaxis = list(
           autorange = TRUE,
-          titlestandoff = 15  # Adjust standoff to increase distance from axis
+          title = list(
+            text = x_axis,
+            standoff = standoff_value
+          )
         ),
         yaxis = list(
           zeroline = TRUE, 
           zerolinecolor = 'gray', 
           zerolinewidth = 1, 
           autorange = TRUE,
-          titlestandoff = 15  # Adjust standoff to increase distance from axis
-        )
+          title = list(
+            text = y_axis,
+            standoff = standoff_value
+          )
+        ),
+        margin = list(l = 60, r = 50, b = 100, t = 50, pad = 4)  # Adjust margins if needed
       )
     }
-    
     
     # If there's a chart caption, add it
     if (input$chart_caption != "") {
       p <- p %>% 
         layout(
-          margin = list(l = 50, r = 50, b = 100, t = 50),
           annotations = list(
             list(
               x = 1, y = -0.3, # Set to the bottom right
@@ -175,7 +185,7 @@ server <- function(input, output, session) {
     }
     
     # Return the modified plotly object
-    p 
+    p
   })
   output$dataTable <- renderDT({
     req(sortedData())
