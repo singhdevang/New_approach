@@ -98,6 +98,18 @@ server <- function(input, output, session) {
     }
     
     
+    # Determine the unique number of categories/labels on x-axis
+    num_categories <- length(unique(df[[char_col]]))
+    
+    # Set label angle dynamically based on the number of categories
+    # For fewer categories, a smaller angle (or 0) can be used, and for more, a larger angle
+    label_angle <- if (input$graphType == 'Vertical Bar Graph') {
+      ifelse(num_categories <= 10, 45, ifelse(num_categories <= 20, 90, 90))
+    } else {
+      # For Horizontal Bar Graph or other graph types, you might want to set it to a default value, like 0
+      0
+    }
+    
     p <- ggplot(df, aes_string(x = char_col, y = num_col)) + 
       geom_bar(stat = "identity", fill = rgb(74/255, 121/255, 134/255), width = input$barSpace) +
       labs(title = input$chartTitle, x = x_axis, y = y_axis) +
@@ -111,6 +123,7 @@ server <- function(input, output, session) {
         ),
         axis.title.x = element_text(family = "Arial"), # Set Arial font for x axis title
         axis.title.y = element_text(family = "Arial"), # Set Arial font for y axis title
+        axis.text.x = element_text(angle = label_angle, vjust = 1, hjust = 1), # Rotate x-axis labels
         panel.grid = element_blank()
       )
     
