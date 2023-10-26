@@ -1,6 +1,14 @@
 server <- function(input, output, session) {
   
-  # This reactive expression handles the file input
+  # This function updates the numeric input selection based on the DataFrame structure
+  updateNumericInput <- function(df) {
+    if (!is.null(df) && sum(sapply(df, is.numeric)) > 0) {
+      numeric_columns <- names(which(sapply(df, is.numeric)))
+      updateSelectInput(session, "selected_numeric", choices = numeric_columns, selected = numeric_columns[1])
+    }
+  }
+  
+  # Existing observeEvent for file input
   observeEvent(input$file1, {
     inFile <- input$file1
     
@@ -18,7 +26,20 @@ server <- function(input, output, session) {
     }
   }, ignoreInit = TRUE)
   
-  # This reactive expression reads the data from the file
+  # Add an observer for sheet selection
+  observe({
+    req(input$file1, input$sheet)
+    
+    inFile <- input$file1
+    df <- tryCatch({
+      read_excel(inFile$datapath, sheet = input$sheet)
+    }, error = function(e) return(NULL))
+    
+    # Update the numeric selection input
+    updateNumericInput(df)
+  })
+  
+  # Reactive expression for data
   data <- reactive({
     inFile <- input$file1
     
@@ -26,7 +47,6 @@ server <- function(input, output, session) {
       return(NULL)
     }
     
-    # Check file type to read the data accordingly
     df <- if (grepl("\\.csv$", inFile$name)) {
       read.csv(inFile$datapath)
     } else {
@@ -39,7 +59,8 @@ server <- function(input, output, session) {
     
     # Set column names for the sortCol input only when a new file is uploaded
     updateSelectInput(session, "sortCol", choices = names(df))
-    
+    # Update the numeric selection input
+    updateNumericInput(df)
     return(df)
   })
   
@@ -68,18 +89,14 @@ server <- function(input, output, session) {
   
   output$numeric_selection <- renderUI({
     df <- data()
-    # Check if data frame has exactly one numeric column and one date column
-    if (!is.null(df) && sum(sapply(df, is.numeric)) == 1 && sum(sapply(df, class) == "Date") == 1) {
-      num_col <- names(df)[sapply(df, is.numeric)]
-      selectInput("selected_numeric", "Select the numeric column:", choices = num_col, selected = num_col)
-    } else if (!is.null(df) && sum(sapply(df, is.numeric)) == 2) {
-      selectInput("selected_numeric", "Select the numeric column:", 
-                  choices = names(df)[sapply(df, is.numeric)], selected = NULL)
+    if (!is.null(df) && sum(sapply(df, is.numeric)) > 0) {
+      numeric_columns <- names(which(sapply(df, is.numeric)))
+      selectInput("selected_numeric", "Select the numeric column:", choices = numeric_columns, selected = numeric_columns[1])
     }
   })
   
   output$barPlot <- renderPlotly({
-    req(sortedData())
+    req(sortedData(), input$selected_numeric)
     
     df <- sortedData()
     # Check for the selection of numeric column and set character/date column
