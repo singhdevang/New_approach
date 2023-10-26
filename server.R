@@ -97,16 +97,29 @@ server <- function(input, output, session) {
     }
     df[[char_col]] <- factor(df[[char_col]], levels = unique(df[[char_col]]))
     
-    # Plotting logic
+    # Assign labels based on graph type
+    if (input$graphType == 'Horizontal Bar Graph') {
+      x_axis <- input$ylab
+      y_axis <- input$xlab
+    } else {
+      x_axis <- input$xlab
+      y_axis <- input$ylab
+    }
+    
+    
     p <- ggplot(df, aes_string(x = char_col, y = num_col)) + 
       geom_bar(stat = "identity", fill = rgb(74/255, 121/255, 134/255), width = input$barSpace) +
-      labs(title = input$chartTitle, x = input$xlab, y = input$ylab) +
+      labs(title = input$chartTitle, x = x_axis, y = y_axis) +
       theme_minimal() +
       theme(
-        plot.title = element_text(hjust = 0.5, size = input$fontSize, family = "Arial", colour = rgb(27/255, 87/255, 104/255)),
-        axis.title.x = element_text(family = "Arial"),
-        axis.title.y = element_text(family = "Arial"),
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        plot.title = element_text(
+          hjust = 0.5,
+          size = input$fontSize, 
+          family = "Arial",
+          colour = rgb(27/255, 87/255, 104/255)
+        ),
+        axis.title.x = element_text(family = "Arial"), # Set Arial font for x axis title
+        axis.title.y = element_text(family = "Arial"), # Set Arial font for y axis title
         panel.grid = element_blank()
       )
     
@@ -115,7 +128,73 @@ server <- function(input, output, session) {
       p <- p + coord_flip()
     }
     
-    ggplotly(p)
+    # Convert ggplot object to plotly object
+    p <- ggplotly(p)
+    
+    # Customize axis lines, enable autorange, and adjust title standoff
+    standoff_value <- 30  # Increase this value to move the axis title further away
+    if (input$graphType == 'Horizontal Bar Graph') {
+      p <- p %>% layout(
+        xaxis = list(
+          zeroline = TRUE, 
+          zerolinecolor = 'gray', 
+          zerolinewidth = 1, 
+          autorange = TRUE,
+          title = list(
+            text = y_axis,
+            standoff = standoff_value
+          )
+        ),
+        yaxis = list(
+          autorange = TRUE,
+          title = list(
+            text = x_axis,
+            standoff = standoff_value
+          )
+        ),
+        margin = list(l = 60, r = 50, b = 100, t = 50, pad = 4)  # Adjust margins if needed
+      )
+    } else { # 'Vertical Bar Graph'
+      p <- p %>% layout(
+        xaxis = list(
+          autorange = TRUE,
+          title = list(
+            text = x_axis,
+            standoff = standoff_value
+          )
+        ),
+        yaxis = list(
+          zeroline = TRUE, 
+          zerolinecolor = 'gray', 
+          zerolinewidth = 1, 
+          autorange = TRUE,
+          title = list(
+            text = y_axis,
+            standoff = standoff_value
+          )
+        ),
+        margin = list(l = 60, r = 50, b = 100, t = 50, pad = 4)  # Adjust margins if needed
+      )
+    }
+    
+    # If there's a chart caption, add it
+    if (input$chart_caption != "") {
+      p <- p %>% 
+        layout(
+          annotations = list(
+            list(
+              x = 1, y = -0.3, # Set to the bottom right
+              xref = 'paper', yref = 'paper',
+              text = input$chart_caption,
+              showarrow = FALSE, xanchor = 'right',
+              font = list(size = 12, color = 'black', family = "Arial")
+            )
+          )
+        )
+    }
+    
+    # Return the modified plotly object
+    p
   })
   
   output$dataTable <- DT::renderDataTable({
