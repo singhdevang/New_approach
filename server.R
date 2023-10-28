@@ -39,6 +39,15 @@ server <- function(input, output, session) {
     updateNumericInput(df)
   })
   
+  # Observe changes in graphType and update the default bar width
+  observe({
+    if (input$graphType == "Horizontal Bar Graph") {
+      updateSliderInput(session, "barSpace", value = 0.7)
+    } else if (input$graphType == "Vertical Bar Graph") {
+      updateSliderInput(session, "barSpace", value = 0.4)
+    }
+  })
+  
   # Reactive expression for data
   data <- reactive({
     inFile <- input$file1
@@ -91,7 +100,7 @@ server <- function(input, output, session) {
     df <- data()
     if (!is.null(df) && sum(sapply(df, is.numeric)) > 0) {
       numeric_columns <- names(which(sapply(df, is.numeric)))
-      selectInput("selected_numeric", "Select the numeric column:", choices = numeric_columns, selected = numeric_columns[1])
+      selectInput("selected_numeric", "Select the Numeric Column:", choices = numeric_columns, selected = numeric_columns[1])
     }
   })
   
@@ -107,7 +116,7 @@ server <- function(input, output, session) {
       char_col <- names(which(sapply(df, is.character)))[1]
       num_col <- names(which(sapply(df, is.numeric)))[1]
     }
-    
+
     # Reorder factor levels if data is sorted
     if (!is.null(input$sortCol) && input$sortCol == char_col) {
       df[[char_col]] <- factor(df[[char_col]], levels = unique(df[[char_col]]))
