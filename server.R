@@ -26,6 +26,17 @@ server <- function(input, output, session) {
     }
   }, ignoreInit = TRUE)
   
+  output$sheet_ui <- renderUI({
+    req(input$file1)
+    
+    # Check if the uploaded file is an Excel file
+    if (grepl("\\.xlsx$", input$file1$name)) {
+      sheets <- excel_sheets(input$file1$datapath)
+      selectInput("sheet", "Select Sheet:", choices = sheets)
+    }
+  })
+  
+  
   # Add an observer for sheet selection
   observe({
     req(input$file1, input$sheet)
@@ -116,7 +127,7 @@ server <- function(input, output, session) {
       char_col <- names(which(sapply(df, is.character)))[1]
       num_col <- names(which(sapply(df, is.numeric)))[1]
     }
-
+    
     # Reorder factor levels if data is sorted
     if (!is.null(input$sortCol) && input$sortCol == char_col) {
       df[[char_col]] <- factor(df[[char_col]], levels = unique(df[[char_col]]))
