@@ -7,6 +7,8 @@ server <- function(input, output, session) {
       updateSelectInput(session, "selected_numeric", choices = numeric_columns, selected = numeric_columns[1])
     }
   }
+  
+  
   tableData <- reactive({
     DT::datatable(sortedData(), options = list(lengthMenu = c(5, 10, 15, 20), pageLength = 10))
   })
@@ -191,6 +193,7 @@ server <- function(input, output, session) {
     p <- ggplotly(p)
     
     # Customize axis lines, enable autorange, and adjust title standoff
+    
     standoff_value <- 30  # Increase this value to move the axis title further away
     if (input$graphType == 'Horizontal Bar Graph') {
       p <- p %>% layout(
@@ -232,7 +235,7 @@ server <- function(input, output, session) {
             standoff = standoff_value
           )
         ),
-        margin = list(l = 60, r = 50, b = 100, t = 50, pad = 4)  # Adjust margins if needed
+        margin = list(l = 60, r = 26, b = 100, t = 50, pad = 4)  # Adjust margins if needed
       )
     }
     
@@ -242,13 +245,14 @@ server <- function(input, output, session) {
         layout(
           annotations = list(
             list(
-              x = 1, y = -0.3, # Set to the bottom right
+              x = 1, y = -0.4, # Adjust this to move the caption further down
               xref = 'paper', yref = 'paper',
               text = input$chart_caption,
-              showarrow = FALSE, xanchor = 'right',
-              font = list(size = 12, color = 'black', family = "Arial")
+              showarrow = FALSE, xanchor = 'right', yanchor='auto', xshift=0, yshift=0,
+              font = list(size = 10, color = 'black', family = "Arial")
             )
           )
+          
         )
     }
     
