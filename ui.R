@@ -39,9 +39,11 @@ ui <- dashboardPage(
       # Second tab content
       tabItem(tabName = "graph_customisation",
               fluidRow(
-                box(plotlyOutput("barPlot"), width = 12)
+                box(plotlyOutput("barPlot"), width = 12),
+                box(DTOutput('dataTableGraphCustomisation'), width = 12)  # Box for the table
+              )
               )
       )
     )
   )
-)
+

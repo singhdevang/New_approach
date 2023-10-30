@@ -7,6 +7,18 @@ server <- function(input, output, session) {
       updateSelectInput(session, "selected_numeric", choices = numeric_columns, selected = numeric_columns[1])
     }
   }
+  tableData <- reactive({
+    DT::datatable(sortedData(), options = list(lengthMenu = c(5, 10, 15, 20), pageLength = 10))
+  })
+  
+  output$dataTable <- renderDT({
+    tableData()
+  })
+  
+  output$dataTableGraphCustomisation <- renderDT({
+    tableData()
+  })
+  
   
   # Existing observeEvent for file input
   observeEvent(input$file1, {
