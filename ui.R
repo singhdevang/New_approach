@@ -1,7 +1,13 @@
 ui <- dashboardPage(
   dashboardHeader(title = "Improvement Cymru Graph Customisation Tool", titleWidth = 450),
   
-  dashboardSidebar(width = 300,
+  dashboardSidebar(width = 310,tags$head(
+    tags$style(HTML(".sidebar {
+height: 90vh; overflow-y: auto;
+}"
+    ) # close HTML
+    ) # close tags$style
+  ), # close tags#Head
     sidebarMenu(
       id = "sidebar_tabs",  # Added an ID here
       menuItem("Data Upload", tabName = "data_upload", icon = icon("upload")),
