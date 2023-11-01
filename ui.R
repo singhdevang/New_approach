@@ -29,7 +29,10 @@ height: 90vh; overflow-y: auto;
       sliderInput("barSpace", "Bar Width:", min = 0.1, max = 1, value = 0.7, step = 0.1),
       textInput("chart_caption", "Chart Caption:", ""),
       textInput("xlab", "X Axis Label:", ""),
-      textInput("ylab", "Y Axis Label:", "")
+      textInput("ylab", "Y Axis Label:", ""),
+      selectInput("exportFormat", "Export Format:", choices = c("CSV" = "csv", "Excel" = "xlsx")),
+      
+      downloadButton("downloadData", label = textOutput("downloadLabel"))
     )
   ),
   

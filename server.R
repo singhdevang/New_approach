@@ -1,4 +1,25 @@
-server <- function(input, output, session) {
+  server <- function(input, output, session) {
+    
+    
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        paste("data-", Sys.Date(), ifelse(input$exportFormat == "csv", ".csv", ".xlsx"), sep="")
+      },
+      content = function(file) {
+        if (input$exportFormat == "csv") {
+          write.csv(sortedData(), file, row.names = FALSE)
+        } else {  # For Excel export
+          # Using the openxlsx package for Excel files
+          openxlsx::write.xlsx(sortedData(), file)
+        }
+      }
+    )
+    
+    output$downloadLabel <- renderText({
+      paste("Download as", toupper(input$exportFormat))
+    })
+  
+
   
   # This function updates the numeric input selection based on the DataFrame structure
   updateNumericInput <- function(df) {
@@ -264,3 +285,4 @@ server <- function(input, output, session) {
     DT::datatable(sortedData(), options = list(lengthMenu = c(5, 10, 15, 20), pageLength = 10))
   })
 }
+
