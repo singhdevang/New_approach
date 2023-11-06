@@ -1,25 +1,27 @@
-  server <- function(input, output, session) {
-    
-    
-    output$downloadData <- downloadHandler(
-      filename = function() {
-        paste("data-", Sys.Date(), ifelse(input$exportFormat == "csv", ".csv", ".xlsx"), sep="")
-      },
-      content = function(file) {
-        if (input$exportFormat == "csv") {
-          write.csv(sortedData(), file, row.names = FALSE)
-        } else {  # For Excel export
-          # Using the openxlsx package for Excel files
-          openxlsx::write.xlsx(sortedData(), file)
-        }
-      }
-    )
-    
-    output$downloadLabel <- renderText({
-      paste("Download as", toupper(input$exportFormat))
-    })
+server <- function(input, output, session) {
+  
   
 
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("data-", Sys.Date(), ifelse(input$exportFormat == "csv", ".csv", ".xlsx"), sep="")
+    },
+    content = function(file) {
+      if (input$exportFormat == "csv") {
+        write.csv(sortedData(), file, row.names = FALSE)
+      } else {  # For Excel export
+        # Using the openxlsx package for Excel files
+        openxlsx::write.xlsx(sortedData(), file)
+      }
+    }
+  )
+  
+  output$downloadLabel <- renderText({
+    paste("Download as", toupper(input$exportFormat))
+  })
+  
+  
   
   # This function updates the numeric input selection based on the DataFrame structure
   updateNumericInput <- function(df) {
@@ -150,7 +152,8 @@
     }
   })
   
-  output$barPlot <- renderPlotly({
+  
+  plotData <- reactive({
     req(sortedData(), input$selected_numeric)
     
     df <- sortedData()
@@ -279,10 +282,31 @@
     
     # Return the modified plotly object
     p
+    
+    
+    
+   
+      })
+
+  
+  output$barPlot <- renderPlotly({
+    plotData()
   })
   
-  output$dataTable <- DT::renderDataTable({
-    DT::datatable(sortedData(), options = list(lengthMenu = c(5, 10, 15, 20), pageLength = 10))
-  })
-}
+  output$downloadPlot <- downloadHandler(
+    filename = function() {
+      paste("plot-", Sys.Date(), ".png")
+    },
+    content = function(file) {
+      req(plotData())  # Make sure there's a plot to download
+      plotly::export(plotData(), file = file)
+    }
+  )
 
+  output$dataTable <- DT::renderDataTable({
+    DT::datatable(sortedData(), 
+                  options = list(lengthMenu = c(5, 10, 15, 20), pageLength = 10))
+  })
+
+
+}

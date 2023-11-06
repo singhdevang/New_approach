@@ -32,9 +32,14 @@ height: 90vh; overflow-y: auto;
       textInput("ylab", "Y Axis Label:", ""),
       selectInput("exportFormat", "Export Format:", choices = c("CSV" = "csv", "Excel" = "xlsx")),
       
-      downloadButton("downloadData", label = textOutput("downloadLabel"))
-    )
-  ),
+      downloadButton("downloadData", label = textOutput("downloadLabel")),
+      downloadButton("downloadPlot", "Download Plot")
+      
+      )
+      
+      
+     )
+  ,
   
   dashboardBody(
     tabItems(
