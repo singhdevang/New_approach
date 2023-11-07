@@ -1,6 +1,6 @@
 server <- function(input, output, session) {
   
-  
+ 
 
   
   output$downloadData <- downloadHandler(
@@ -265,27 +265,25 @@ server <- function(input, output, session) {
     
     # If there's a chart caption, add it
     if (input$chart_caption != "") {
-      p <- p %>% 
-        layout(
-          annotations = list(
-            list(
-              x = 1, y = -0.4, # Adjust this to move the caption further down
-              xref = 'paper', yref = 'paper',
-              text = input$chart_caption,
-              showarrow = FALSE, xanchor = 'right', yanchor='auto', xshift=0, yshift=0,
-              font = list(size = 10, color = 'black', family = "Arial")
-            )
+      p <- p %>% layout(
+        margin = list(l = 60, r = 50, b = 130, t = 50, pad = 4),  # You might need to increase the `b` value here to give more space for the caption
+        annotations = list(
+          list(
+            x = 1, y = -0.15,  # These values will need to be adjusted so the caption fits within the new bottom margin space
+            xref = 'paper', yref = 'paper',
+            text = input$chart_caption,
+            showarrow = FALSE, xanchor = 'right', yanchor = 'top',
+            font = list(size = 10, color = 'black', family = "Arial")
+          )
+        )
           )
           
-        )
+        
     }
     
     # Return the modified plotly object
     p
     
-    
-    
-   
       })
 
   
@@ -307,6 +305,5 @@ server <- function(input, output, session) {
     DT::datatable(sortedData(), 
                   options = list(lengthMenu = c(5, 10, 15, 20), pageLength = 10))
   })
-
 
 }
